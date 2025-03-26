@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: "http://localhost:4200",  // Zugang zum Angular
+    origin: ["http://localhost:4200", "https://produktmanager-frontend.onrender.com"], // Zugang zum Angular
     methods: "GET,POST,PUT,DELETE",
     credentials: true
 }));
