@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
                 m.name AS manufacturer_name,
                 m.address AS manufacturer_address,
                 m.country AS manufacturer_country,
-                -- 🔹Group ingredients in one list separate with commas
+                --Group ingredients in one list separate with commas
                 COALESCE(string_agg(DISTINCT i.name, ', '), '') AS ingredient_names,
                 n.energy_kcal,
                 n.protein_g,
@@ -215,7 +215,7 @@ router.get("/:id", async (req, res) => {
 
 //create a product
 router.post("/", async (req, res) => {
-    console.log("🌟 Request body recibido:", req.body);  // 🔍 Verificar `category_id`
+    console.log("🌟 Inhalt von req.body auf dem Server empfangen: ", req.body);  // 🔍 Verificar `category_id`
     const {
         category_id,
         ean_gtin,
@@ -243,7 +243,7 @@ router.post("/", async (req, res) => {
     try {
         let manufacturer_id = null;
 
-        // 🔍 Verificar si el EAN ya existe
+        // Verify that EAN exists
         const existingProduct = await pool.query(
             `SELECT product_id FROM products WHERE ean_gtin = $1;`, [ean_gtin]
         );
@@ -276,7 +276,7 @@ router.post("/", async (req, res) => {
 
         const product_id = productResult.rows[0].product_id;
 
-        if (ingredients.length > 0) {
+        if (ingredients.length > 0) { //Look if there are ingredients in the request
             for (const ingredient of ingredients) {
                 const ingredientName = ingredient.name;
 
@@ -286,7 +286,7 @@ router.post("/", async (req, res) => {
 
                 let ingredient_id;
                 if (ingredientResult.rowCount > 0) {
-                    ingredient_id = ingredientResult.rows[0].ingredient_id;
+                    ingredient_id = ingredientResult.rows[0].ingredient_id; //if ingredient name exists, uses this id.
                 } else {
                     const insertIngredientResult = await pool.query(
                         `INSERT INTO ingredients (name) VALUES ($1) RETURNING ingredient_id;`, [ingredientName]
@@ -302,9 +302,9 @@ router.post("/", async (req, res) => {
                         [product_id, ingredient_id]
                     );
                 } catch (error) {
-                    // Si ya existe la relación, simplemente ignoramos el error
-                    if (error.code === '23505') { // Código de error para conflicto de clave duplicada
-                        console.log(`⚠️ La relación entre el producto y el ingrediente '${ingredientName}' ya existe.`);
+
+                    if (error.code === '23505') {
+                        console.log(`⚠️ Die Relation zwischen product und ingredient '${ingredientName}' gibt es bereits.`);
                     } else {
                         console.error("❌ Fehler beim Einfügen des Ingredients:", error);
                         return res.status(500).json({ error: "Interner Serverfehler beim Einfügen des Ingredients." });
@@ -339,7 +339,7 @@ router.post("/", async (req, res) => {
 
 //update a product
 router.put("/:id", async (req, res) => {
-    console.log("Contenido de req.body recibido en el servidor:", req.body);  // 🔍 Verificar si llegan category_id, manufacturer y ingredients
+    console.log("Inhalt von req.body auf dem Server empfangen:", req.body);
     const {
         category_id,
         manufacturer_name,
@@ -381,10 +381,10 @@ router.put("/:id", async (req, res) => {
             return res.status(400).json({ error: "Produkt nicht gefunden." });
         }
 
-        if (req.body.manufacturer) {  // ✅ Comprueba si existe un objeto `manufacturer`
+        if (req.body.manufacturer) {
             const { name: manufacturer_name, address: manufacturer_address, country: manufacturer_country } = req.body.manufacturer;
 
-            if (manufacturer_name) { // ✅ Asegúrate que hay un nombre antes de intentar insertar
+            if (manufacturer_name) {
                 const manufacturerResult = await pool.query(
                     `INSERT INTO manufacturers (name, address, country)
              VALUES ($1, $2, $3)
@@ -492,16 +492,12 @@ router.put("/:id", async (req, res) => {
 // DELETE all data from the database
 router.delete("/reset", async (req, res) => {
     try {
-        // Borrar todas las relaciones producto-ingredientes
         await pool.query(`DELETE FROM product_ingredients;`);
 
-        // Borrar toda la información nutricional
         await pool.query(`DELETE FROM nutrition_info;`);
 
-        // Borrar todos los productos
         await pool.query(`DELETE FROM products;`);
 
-        // Borrar categorías, fabricantes e ingredientes
         await pool.query(`DELETE FROM categories;`);
         await pool.query(`DELETE FROM manufacturers;`);
         await pool.query(`DELETE FROM ingredients;`);

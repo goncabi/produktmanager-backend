@@ -7,7 +7,7 @@ async function populateDatabase() {
 
 
         // ===========================
-        // 1. INSERTAR CATEGORÍAS
+        // 1. CATEGORIES
         // ===========================
         await pool.query(`
             INSERT INTO categories (category_id, name)
@@ -17,7 +17,7 @@ async function populateDatabase() {
         `);
 
         // ===========================
-        // 2. INSERTAR FABRICANTES
+        // 2. MANUFACTURERS
         // ===========================
         await pool.query(`
             INSERT INTO manufacturers (manufacturer_id, name, address, country)
@@ -29,7 +29,7 @@ async function populateDatabase() {
         `);
 
         // ===========================
-        // 3. INSERTAR INGREDIENTES
+        // 3. INGREDIENTS
         // ===========================
         await pool.query(`
             INSERT INTO ingredients (name)
@@ -40,7 +40,7 @@ async function populateDatabase() {
         `);
 
         // ===========================
-        // 4. INSERTAR PRODUCTOS
+        // 4. PRODUCTS
         // ===========================
         const products = [
             [1, 1, 1, '1234567890123', "Coca-Cola", "Erfrischungsgetränk", 1.50, 1.20, 0, 500, 0, 0, 0, 0.25, "https://m.media-amazon.com/images/I/51v8nyxSOYL._SL1500_.jpg"],
@@ -68,7 +68,7 @@ async function populateDatabase() {
         }
 
         // ===========================
-        // 5. ASOCIAR INGREDIENTES A PRODUCTOS
+        // 5. PRODUCT_INGREDIENTS
         // ===========================
         const productIngredients = [
             [1, 'Wasser'], [1, 'Zucker'],
@@ -91,7 +91,7 @@ async function populateDatabase() {
             }
         }
         // ===========================
-        // 5. INSERTAR INFORMACIÓN NUTRICIONAL
+        // 5. NUTRITIONAL INFO
         // ===========================
         const nutritionInfo = [
             [1, 180, 0, 0, 0, 44, 44, 0, 0],
